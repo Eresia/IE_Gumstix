@@ -21,6 +21,8 @@ void launch_client()
 	int id = 0;
 	int lost = 0;
 
+	AccelValue average = calibrate(1000);
+
 	if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP))==-1)
 	diep("socket");
 
@@ -65,7 +67,8 @@ void launch_client()
 			}
 			else {  /*si la condition temps réel est respectée*/
 				/*envoi des informations*/
-				sprintf(buf, "%02x %x %x %x %x", 1, id, getI2cValue(ASK_BUS, ASK_ADDRESS, ASK_X), getI2cValue(ASK_BUS, ASK_ADDRESS, ASK_Y), getI2cValue(ASK_BUS, ASK_ADDRESS, ASK_Z));
+				AccelValue accel = calculateCalibrateAcceleration(average);
+				sprintf(buf, "%02x %x %x %x %x", 1, id, accel.x, accel.y, accel.z);
 				if (sendto(s, buf, BUFLEN, 0, (const struct sockaddr *) &si_other, slen)==-1){
 					diep("sendto()");
 				}

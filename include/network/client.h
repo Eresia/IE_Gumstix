@@ -12,7 +12,7 @@
 	#include <sys/time.h>
 	#include <string.h>
 
-	#include "i2c/i2cget.h"
+	#include "stats/stats.h"
 
 	#define BUFLEN 512
 	#define PORT 9930

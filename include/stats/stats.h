@@ -13,4 +13,5 @@ struct AccelValue{
 #endif
 
 AccelValue calculateAcceleration();
-AccelValue calculateAverage();
+AccelValue calibrate(long miliseconds);
+AccelValue calculateCalibrateAcceleration(AccelValue average);
