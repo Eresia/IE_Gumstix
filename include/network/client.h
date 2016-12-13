@@ -12,18 +12,20 @@
 	#include <sys/time.h>
 	#include <string.h>
 
+	#include "i2c/i2cget.h"
+
 	#define BUFLEN 512
 	#define PORT 9930
 
 
 	#define TASK_PERIOD 50000 /* période de la tâche en microsecondes*/
-	#define TASK_DEADLINE 10000 /* depassement autorisé*/
+	#define TASK_DEADLINE 18 /* depassement autorisé*/
 
-	#define NB_LOOP 1000
+	#define NB_LOOP 50
 	#define STOP_TIMEOUT 500
 
-	//#define SRV_IP "192.168.2.1"
-	#define SRV_IP "127.0.0.1"
+	#define SRV_IP "192.168.2.1"
+	//#define SRV_IP "127.0.0.1"
 
 	void launch_client();
 

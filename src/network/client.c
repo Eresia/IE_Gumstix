@@ -17,12 +17,9 @@ void launch_client()
 	struct sockaddr_in si_other;
 	int s, slen=sizeof(si_other);
 	char buf[BUFLEN];
-	int val1,val2,val3;
-	int tmp = 0;
 	int i;
 	int id = 0;
-
-	val1=val2=val3=4;
+	int lost = 0;
 
 	if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP))==-1)
 	diep("socket");
@@ -44,38 +41,38 @@ void launch_client()
 		diep("recvfrom()");
 	}
 
-	printf("BUUUUF : %s\n", buf);
+	printf("Reception : %s\n", buf);
 
 	/* on récupère le temps avant de rentrer dans la boucle*/
 	gettimeofday(&start, 0);
 
-	for(i = 0; i < NB_LOOP; i++) {
+	i = 0;
 
+	while(i < NB_LOOP) {
 
 		/*mesure du temps écoulé depuis le dernier passage ici- attention section critique possible- */
 		gettimeofday(&checkpoint, 0);
 		diff=(checkpoint.tv_sec-start.tv_sec) * 1000000L + (checkpoint.tv_usec-start.tv_usec);
-		if (diff < TASK_PERIOD ) ; /* On cadence l'execution toutes les TASK_PERIOD*/
+		if (diff < TASK_PERIOD ){ /* On cadence l'execution toutes les TASK_PERIOD*/
+
+		}
 		else {
 			gettimeofday(&start, 0); /* On réinitialise le compteur */
-			printf("temps écoulé=%lld usec\n",diff);
-			if (diff > TASK_PERIOD + TASK_DEADLINE) printf ("***echeance manquée \n"); /* si la condition temps réelle n'est pas respectée */
+			//printf("temps écoulé=%lld usec\n",diff);
+			if (diff > TASK_PERIOD + TASK_DEADLINE){
+				printf ("***echeance manquée, id : %d\n", id); /* si la condition temps réelle n'est pas respectée */
+				lost++;
+			}
 			else {  /*si la condition temps réel est respectée*/
-
 				/*envoi des informations*/
-				sprintf(buf, "%02x %0x %d %d %d\n", 1, id, val1,val2,val3);
-				if (sendto(s, buf, BUFLEN, 0, (const struct sockaddr *) &si_other, slen)==-1)
-				diep("sendto()");
-
-				/* changement des informations (simul*/
-				tmp++;
-				if (tmp ==254){
-					tmp=0;
+				sprintf(buf, "%02x %x %x %x %x", 1, id, getI2cValue(ASK_BUS, ASK_ADDRESS, ASK_X), getI2cValue(ASK_BUS, ASK_ADDRESS, ASK_Y), getI2cValue(ASK_BUS, ASK_ADDRESS, ASK_Z));
+				if (sendto(s, buf, BUFLEN, 0, (const struct sockaddr *) &si_other, slen)==-1){
+					diep("sendto()");
 				}
-				val1=val2=val3=tmp;
 
 				id++;
 			}
+			i++;
 		}
 	}
 
@@ -83,12 +80,14 @@ void launch_client()
 
 	do{
 		int result;
-		int timeout = STOP_TIMEOUT;
+		struct timeval timeout;
+		timeout.tv_sec = 0;
+		timeout.tv_usec = STOP_TIMEOUT * 1000;
 		fd_set readfs;
 		FD_ZERO(&readfs);
 		FD_SET(s, &readfs);
 
-		sprintf(buf, "%02x", 2);
+		sprintf(buf, "%02x %x", 2, lost);
 		if (sendto(s, buf, BUFLEN, 0, (const struct sockaddr *) &si_other, slen)==-1){
 			diep("sendto()");
 		}
@@ -108,7 +107,9 @@ void launch_client()
 
 	}while(!end);
 
-	printf("BUUUUF : %s\n", buf);
+	printf("Reception : %s\n", buf);
+
+	printf("Lost : %d\n", lost);
 
 	close(s);
 }

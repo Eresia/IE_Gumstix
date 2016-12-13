@@ -1,5 +1,5 @@
-#CC=arm-linux-gnueabi-gcc
-CC=gcc
+CC=arm-linux-gnueabi-gcc
+#CC=gcc
 
 scriptDir=$(shell pwd)
 objectDir=bin
