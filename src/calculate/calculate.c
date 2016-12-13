@@ -1,6 +1,6 @@
 #include <sys/time.h>
 
-#include "stats/stats.h"
+#include "calculate/calculate.h"
 
 long getTime(struct timeval beginTime, struct timeval actualTime){
 	long begin = beginTime.tv_sec * 1000000 + beginTime.tv_usec;

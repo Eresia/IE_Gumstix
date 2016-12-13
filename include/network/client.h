@@ -12,7 +12,7 @@
 	#include <sys/time.h>
 	#include <string.h>
 
-	#include "stats/stats.h"
+	#include "calculate/calculate.h"
 
 	#define BUFLEN 512
 	#define PORT 9930
