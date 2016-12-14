@@ -1,6 +1,8 @@
 #ifndef ACCEL_VALUE_H
 #define ACCEL_VALUE_H
 
+#include <stdint.h>
+
 #include "i2c/i2cget.h"
 
 typedef struct AccelValue AccelValue;

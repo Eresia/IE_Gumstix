@@ -9,6 +9,10 @@ long getTime(struct timeval beginTime, struct timeval actualTime){
 	return actual - begin;
 }
 
+int8_t convertValue(uint8_t value){
+	return value;
+}
+
 AccelValue calculateAcceleration(){
 	AccelValue acceleration;
 

@@ -1,12 +1,12 @@
-CC=arm-linux-gnueabi-gcc
-#CC=gcc
+#CC=arm-linux-gnueabi-gcc
+CC=gcc
 
 scriptDir=$(shell pwd)
 objectDir=bin
 srcDir=src
 headDir=include
 
-CFLAGS=-Wall -g -DDEBUG -I$(scriptDir)/$(headDir)
+CFLAGS=-Wall -g -DDEBUG -I$(scriptDir)/$(headDir) #-std=c99
 EFLAGS=-lpthread
 
 srcExt=.c
