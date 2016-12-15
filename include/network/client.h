@@ -12,6 +12,7 @@
 	#include <sys/time.h>
 	#include <string.h>
 
+	#include "calculate/vector3.h"
 	#include "calculate/calculate.h"
 
 	#define BUFLEN 512
