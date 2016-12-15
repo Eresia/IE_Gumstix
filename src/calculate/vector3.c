@@ -10,6 +10,20 @@ Vector3 getZeroVector3(){
 	return result;
 }
 
+void filterVector3(Vector3* vector, double filter){
+	if((vector->x > -filter) && (vector->x < filter)){
+		vector->x = 0;
+	}
+
+	if((vector->y > -filter) && (vector->y < filter)){
+		vector->y = 0;
+	}
+
+	if((vector->z > -filter) && (vector->z < filter)){
+		vector->z = 0;
+	}
+}
+
 Vector3 addVector3(Vector3 vector1, Vector3 vector2){
 	Vector3 result;
 

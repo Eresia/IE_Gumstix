@@ -54,17 +54,7 @@ Vector3 getCalibrateAcceleration(Vector3 average){
 	acceleration.y -= average.y;
 	acceleration.z -= average.z;
 
-	if((acceleration.x > -ERROR_ACCEL_INTERVAL) && (acceleration.x < ERROR_ACCEL_INTERVAL)){
-		acceleration.x = 0;
-	}
-
-	if((acceleration.y > -ERROR_ACCEL_INTERVAL) && (acceleration.y < ERROR_ACCEL_INTERVAL)){
-		acceleration.y = 0;
-	}
-
-	if((acceleration.z > -ERROR_ACCEL_INTERVAL) && (acceleration.z < ERROR_ACCEL_INTERVAL)){
-		acceleration.z = 0;
-	}
+	filterVector3(&acceleration, ERROR_ACCEL_INTERVAL);
 
 	return acceleration;
 }
@@ -79,6 +69,8 @@ Vector3 calculateSpeed(Vector3 average, ObjectInformation* informations, double 
 	result = addVector3(speed0, multiplicateVector3ByDouble(averageAccel, timeInSecond));
 
 	informations->acceleration = actualAccel;
+
+	filterVector3(&result, ERROR_SPEED_INTERVAL);
 
 	return result;
 }
