@@ -19,9 +19,9 @@ void filterVector3(Vector3* vector, double filter){
 		vector->y = 0;
 	}
 
-	if((vector->z > -filter) && (vector->z < filter)){
+	//if((vector->z > -filter) && (vector->z < filter)){
 		vector->z = 0;
-	}
+	//}
 }
 
 Vector3 addVector3(Vector3 vector1, Vector3 vector2){

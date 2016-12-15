@@ -20,10 +20,10 @@
 
 
 	#define TASK_PERIOD 50000 /* période de la tâche en microsecondes*/
-	#define TASK_DEADLINE 100 /* depassement autorisé*/
+	#define TASK_DEADLINE 1000 /* depassement autorisé*/
 	//#define TASK_DEADLINE 18 /* depassement autorisé*/
 
-	#define NB_LOOP 1000
+	#define NB_LOOP 50
 	#define STOP_TIMEOUT 500
 
 	#define SRV_IP "192.168.2.1"

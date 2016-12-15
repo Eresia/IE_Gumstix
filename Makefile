@@ -1,5 +1,5 @@
-#CC=arm-linux-gnueabi-gcc
-CC=gcc
+CC=arm-linux-gnueabi-gcc
+#CC=gcc
 
 scriptDir=$(shell pwd)
 objectDir=bin
@@ -24,6 +24,9 @@ headers=$(foreach dir, $(headDirectories), $(wildcard $(scriptDir)/$(dir)/*$(hea
 objects=$(foreach file, $(srcFile:$(srcExt)=.o), $(objectDir)/$(notdir $(file)))
 
 all: $(launcher)
+
+install:
+	scp $(launcher) root@192.168.2.2:/home/root/
 
 $(launcher): compilation
 	$(CC) -o $(launcher) $(objects) $(EFLAGS)

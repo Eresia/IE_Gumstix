@@ -7,8 +7,8 @@
 #include "i2c/i2cget.h"
 #include "calculate/vector3.h"
 
-#define ERROR_ACCEL_INTERVAL 2
-#define ERROR_SPEED_INTERVAL 2
+#define ERROR_ACCEL_INTERVAL 0
+#define ERROR_SPEED_INTERVAL 0
 
 typedef struct ObjectInformation ObjectInformation;
 struct ObjectInformation{

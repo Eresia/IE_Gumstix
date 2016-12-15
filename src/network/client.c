@@ -25,6 +25,8 @@ void launch_client()
 
 	Vector3 average;
 
+	double beginTime;
+
 	if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP))==-1)
 	diep("socket");
 
@@ -41,14 +43,11 @@ void launch_client()
 		diep("sendto()");
 	}
 
-	if(recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *) &si_other, (socklen_t*) &slen) == -1){
+	/*if(recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *) &si_other, (socklen_t*) &slen) == -1){
 		diep("recvfrom()");
-	}
+	}*/
 
 	printf("Reception : %s\n", buf);
-
-	/* on récupère le temps avant de rentrer dans la boucle*/
-	gettimeofday(&start, 0);
 
 	i = 0;
 
@@ -58,7 +57,15 @@ void launch_client()
 	informations.position = getZeroVector3();
 	gettimeofday(&informations.lastTime, NULL);
 
+	beginTime = informations.lastTime.tv_sec;
+	beginTime += ((double) informations.lastTime.tv_usec) / 1000000;
+
+	/* on récupère le temps avant de rentrer dans la boucle*/
+	gettimeofday(&start, 0);
+
 	while(i < NB_LOOP) {
+
+		calculatePosition(average, &informations);
 
 		/*mesure du temps écoulé depuis le dernier passage ici- attention section critique possible- */
 		gettimeofday(&checkpoint, 0);
@@ -75,12 +82,15 @@ void launch_client()
 			}
 			else {  /*si la condition temps réel est respectée*/
 				/*envoi des informations*/
-				calculatePosition(average, &informations);
+
+				double time = informations.lastTime.tv_sec;
+				time += ((double) informations.lastTime.tv_usec) / 1000000;
 
 				sprintf(buf, "%02x %x", 1, id);
 				sprintf(buf, "%s %lf %lf %lf", buf, informations.position.x, informations.position.y, informations.position.z);
 				sprintf(buf, "%s %lf %lf %lf", buf, informations.speed.x, informations.speed.y, informations.speed.z);
 				sprintf(buf, "%s %lf %lf %lf", buf, informations.acceleration.x, informations.acceleration.y, informations.acceleration.z);
+				sprintf(buf, "%s %lf", buf, time - beginTime);
 
 				if (sendto(s, buf, BUFLEN, 0, (const struct sockaddr *) &si_other, slen)==-1){
 					diep("sendto()");
