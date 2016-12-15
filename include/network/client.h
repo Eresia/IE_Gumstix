@@ -20,7 +20,7 @@
 
 
 	#define TASK_PERIOD 50000 /* période de la tâche en microsecondes*/
-	#define TASK_DEADLINE 25 /* depassement autorisé*/
+	#define TASK_DEADLINE 100 /* depassement autorisé*/
 	//#define TASK_DEADLINE 18 /* depassement autorisé*/
 
 	#define NB_LOOP 1000

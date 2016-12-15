@@ -21,7 +21,9 @@ void launch_client()
 	int id = 0;
 	int lost = 0;
 
-	//Vector3 average = calibrate(1000);
+	ObjectInformation informations;
+
+	Vector3 average;
 
 	if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP))==-1)
 	diep("socket");
@@ -50,6 +52,12 @@ void launch_client()
 
 	i = 0;
 
+	average = calibrate(1000);
+	informations.acceleration = getZeroVector3();
+	informations.speed = getZeroVector3();
+	informations.position = getZeroVector3();
+	gettimeofday(&informations.lastTime, NULL);
+
 	while(i < NB_LOOP) {
 
 		/*mesure du temps écoulé depuis le dernier passage ici- attention section critique possible- */
@@ -67,9 +75,13 @@ void launch_client()
 			}
 			else {  /*si la condition temps réel est respectée*/
 				/*envoi des informations*/
-				Vector3 accel = getAcceleration();
-				printf("ZZZ : %lf\n", accel.z);
-				sprintf(buf, "%02x %x %lf %lf %lf", 1, id, accel.x, accel.y, accel.z);
+				calculatePosition(average, &informations);
+
+				sprintf(buf, "%02x %x", 1, id);
+				sprintf(buf, "%s %lf %lf %lf", buf, informations.position.x, informations.position.y, informations.position.z);
+				sprintf(buf, "%s %lf %lf %lf", buf, informations.speed.x, informations.speed.y, informations.speed.z);
+				sprintf(buf, "%s %lf %lf %lf", buf, informations.acceleration.x, informations.acceleration.y, informations.acceleration.z);
+
 				if (sendto(s, buf, BUFLEN, 0, (const struct sockaddr *) &si_other, slen)==-1){
 					diep("sendto()");
 				}

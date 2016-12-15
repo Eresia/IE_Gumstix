@@ -1,5 +1,15 @@
 #include "calculate/vector3.h"
 
+Vector3 getZeroVector3(){
+	Vector3 result;
+
+	result.x = 0;
+	result.y = 0;
+	result.z = 0;
+
+	return result;
+}
+
 Vector3 addVector3(Vector3 vector1, Vector3 vector2){
 	Vector3 result;
 
