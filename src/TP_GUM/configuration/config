@@ -1,0 +1,8 @@
+set terminal x11
+set size 0.8,0.8
+set nokey
+
+set xrange [0:500]
+set yrange [0;255]
+
+
