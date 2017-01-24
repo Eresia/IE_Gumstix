@@ -1,5 +1,5 @@
-#include "protocol.h"
-#include "gnuplot_i.h"
+#include "lib/protocol.h"
+#include "lib/gnuplot_i.h"
 
 void plot(){
 	gnuplot_ctrl *h;
@@ -13,8 +13,8 @@ void plot(){
 }
 
 void splot(){
-	
-	gnuplot_ctrl *h;
+
+	gnuplot_ctrl *h = NULL;
 	gnuplot_init();
 	gnuplot_cmd(h, "set xlabel 'temps en secondes'");
         gnuplot_cmd(h, "set ylabel 'position'");
@@ -53,7 +53,7 @@ void diep(char *s)
 void* client(void* args){
 
 	struct sockaddr_in si_me, si_other;
-        int s, i, slen=sizeof(si_other);
+        int s, slen=sizeof(si_other);
         char buf[BUFLEN];
 	Protocol protocol;
 	int count=0;
@@ -72,19 +72,19 @@ void* client(void* args){
         si_me.sin_port = htons(PORT);
         si_me.sin_addr.s_addr = htonl(INADDR_ANY);
 
-	if (bind(s, &si_me, sizeof(si_me))==-1)
+	if (bind(s, (const struct sockaddr * ) &si_me, sizeof(si_me))==-1)
               diep("bind");
 
         while (1) {
 
-        	if (recvfrom(s, buf, BUFLEN, 0, &si_other, &slen)==-1)
+        	if (recvfrom(s, buf, BUFLEN, 0, (struct sockaddr * ) &si_other, (socklen_t *) &slen)==-1)
 	        	diep("recvfrom()");
            	printf("Received packet from %s:%d\nData: %s\n\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port), buf);
-		
+
 		/*traitement*/
 		protocol = parseMessage(buf);
 		if(strcmp(protocol.msgid,"00")==0){
-	
+
 			/*reception du premier message*/
 			printf("message de début\n");
 			StartMessage startMessage;
@@ -94,7 +94,7 @@ void* client(void* args){
 			stats.nbPacketsTotal = (int) strtol(startMessage.packetCount,NULL, 16);
 
 			/*envoi d'un accusé de récéption*/
-			if (sendto(s, "03", BUFLEN, 0, &si_other, slen)==-1)
+			if (sendto(s, "03", BUFLEN, 0, (const struct sockaddr * ) &si_other, slen)==-1)
 		 		diep("sendto()");
 
 		}
@@ -116,12 +116,12 @@ void* client(void* args){
 			char* x = malloc(16*sizeof(char));
 			char* y = malloc(16*sizeof(char));
 			char* z = malloc(16*sizeof(char));
-			
+
 			int packetMessageId1;
 			double x1;
 			double y1;
 			double z1;
-			
+
 			packetMessageId1 = (int) strtol(packetMessage.packetId, NULL,16);
 			x1 = atof(packetMessage.x);
 			y1 = atof(packetMessage.y);
@@ -135,14 +135,14 @@ void* client(void* args){
 			strcat(ligneCsv, packetMessageId);
 			strcat(ligneCsv, " ");
 			strcat(ligneCsv, x);
-			strcat(ligneCsv, " ");          
-			strcat(ligneCsv, y);          
-			strcat(ligneCsv, " ");          
-			strcat(ligneCsv, z);          
-			strcat(ligneCsv, "\n");		
+			strcat(ligneCsv, " ");
+			strcat(ligneCsv, y);
+			strcat(ligneCsv, " ");
+			strcat(ligneCsv, z);
+			strcat(ligneCsv, "\n");
 
 			/*ecriture sur le fichier csv*/
-			fputs(ligneCsv, csvFile);	
+			fputs(ligneCsv, csvFile);
 
 			int packetId = (int)strtol(packetMessage.packetId,NULL,16);
 
@@ -159,20 +159,20 @@ void* client(void* args){
 		}
 
 		else if(strcmp(protocol.msgid,"02")==0){
-	
+
 			/*traitement du message de fin*/
 			printf("message de fin\n");
-			EndMessage endMessage = parse_EndMessage(protocol.payload);			
+			EndMessage endMessage = parse_EndMessage(protocol.payload);
 
 			/*envoi d'un accusé de récéption*/
-			if (sendto(s, "04", BUFLEN, 0, &si_other, slen)==-1)
+			if (sendto(s, "04", BUFLEN, 0, (const struct sockaddr * ) &si_other, slen)==-1)
                         	diep("sendto()");
 
 			stats.nbPacketsRecu = messageCount -1;
 			stats.nbPacketsError = (int) strtol(endMessage.echeance, NULL, 16);
 			stats.nbPacketsPerdu = stats.nbPacketsTotal - stats.nbPacketsRecu - stats.nbPacketsError;;
-	
-	
+
+
 			/*affichage des statistiques*/
 			affiche_Statistique(stats);
 			fclose(csvFile);
@@ -193,7 +193,7 @@ int main(){
 		return EXIT_FAILURE;
 	}
 	pthread_join(threadClient,NULL);
-	
+
 
 	return 0;
 }

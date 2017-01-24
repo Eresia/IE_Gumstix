@@ -1,6 +1,8 @@
 #ifndef ACCEL_VALUE_H
 #define ACCEL_VALUE_H
 
+#define IS_GUMSTIX
+
 #include <sys/time.h>
 #include <stdint.h>
 

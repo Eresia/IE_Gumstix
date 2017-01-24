@@ -1,4 +1,4 @@
-#include "protocol.h"
+#include "lib/protocol.h"
 
 /**
  * \fn StartMessage parse_StartMessage(char* message)
@@ -24,7 +24,7 @@ StartMessage parse_StartMessage(char* message){
 	for (i=0;i<strlen(message);i++){
 		packetCount[j] = message[i];
 		j++;
-	} 
+	}
 
 	/*copie des variables dans la structure*/
 	strcpy(startMessage.packetCount, packetCount);
@@ -35,7 +35,7 @@ StartMessage parse_StartMessage(char* message){
 /**
  * \fn EndMessage parse_EndMessage(char* message)
  * \brief Fonction de parsing des message de type EndMessage
- * 
+ *
  * \param message contenu du message non parsé
  * \return le message parsé dans la structure EndMessage
  */
@@ -163,7 +163,7 @@ PacketMessage parse_PacketMessage(char* message){
 				state=5;
 				i++;
 				j=0;
-			}	
+			}
 		}
 
 		if(state==5){
@@ -272,7 +272,7 @@ PacketMessage parse_PacketMessage(char* message){
 
 /**
  * \fn Protocol parseMessage(char* message)
- * \brief Fonction de parsing du protocol 
+ * \brief Fonction de parsing du protocol
  *
  * \param message contenu du message à parser
  * \return Le protocol parsé avec le msgid et la Payload
@@ -295,7 +295,7 @@ Protocol parseMessage(char *message){
 	char* buf=malloc(MAXLENGTH*sizeof(char));
 	char* payload=malloc(MAXPAYLOAD*sizeof(char));
 	int j=0;
-	int i=0; 
+	int i=0;
 
 	/*parcour du message*/
 	for(i=0; i<strlen(message);i++){
@@ -319,11 +319,10 @@ Protocol parseMessage(char *message){
 			j++;
 		}
 	}
-	
+
 	/*copie des éléments du message dans la structure protocol*/
 	strcpy(protocol.payload, payload);
-	strcpy(protocol.msgid, buf);	
+	strcpy(protocol.msgid, buf);
 
 	return protocol;
 }
-
