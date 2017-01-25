@@ -64,7 +64,6 @@ void launch_client()
 	gettimeofday(&start, 0);
 
 	while(i < NB_LOOP) {
-
 		calculatePosition(average, &informations);
 
 		/*mesure du temps écoulé depuis le dernier passage ici- attention section critique possible- */
@@ -98,7 +97,9 @@ void launch_client()
 
 				id++;
 			}
-			incrementSimulatedIterator();
+			#ifndef IS_GUMSTIX
+				incrementSimulatedIterator();
+			#endif
 			i++;
 		}
 	}

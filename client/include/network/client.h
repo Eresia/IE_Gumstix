@@ -26,8 +26,8 @@
 	#define NB_LOOP 50
 	#define STOP_TIMEOUT 500
 
-	//#define SRV_IP "192.168.2.1"
-	#define SRV_IP "127.0.0.1"
+	#define SRV_IP "192.168.10.2"
+	//#define SRV_IP "127.0.0.1"
 
 	void launch_client();
 

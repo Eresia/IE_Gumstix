@@ -7,7 +7,7 @@
 #include "i2c/i2cget.h"
 #include "calculate/vector3.h"
 
-//#define IS_GUMSTIX
+#define IS_GUMSTIX
 
 #define ERROR_ACCEL_INTERVAL 0
 #define ERROR_SPEED_INTERVAL 0

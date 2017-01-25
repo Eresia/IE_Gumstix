@@ -1,41 +1,36 @@
 #include "server/server.h"
 
-void gnu_accel(){
+void gnu_graph(Vector3 min, Vector3 max, char* simuFile, char* resultFile){
+	char* cmd;
 	gnuplot_ctrl *h;
 	h = gnuplot_init();
 	gnuplot_cmd(h, "set xlabel 'temps en secondes'");
 	gnuplot_cmd(h, "set ylabel 'acceleration'");
 	gnuplot_cmd(h, "set terminal svg");
-	gnuplot_cmd(h, "set output 'gnuplot/acceleration.svg'");
-	gnuplot_cmd (h, "plot 'gnuplot/acceleration' using 1:2 title 'x' with linespoints");
-	gnuplot_cmd(h, "replot 'gnuplot/acceleration' using 1:3 title 'y' with linespoints");
-	gnuplot_cmd(h,"replot 'gnuplot/acceleration' using 1:4 title 'z' with linespoints");
 
-}
+	cmd = malloc((strlen("set output ''") + strlen(resultFile) + 1) * sizeof(char));
+	sprintf(cmd, "set output '%s'", resultFile);
+	gnuplot_cmd(h, cmd);
+	free(cmd);
 
-void gnu_speed(){
-	gnuplot_ctrl *h;
-	h = gnuplot_init();
-	gnuplot_cmd(h, "set xlabel 'temps en secondes'");
-	gnuplot_cmd(h, "set ylabel 'vitesse'");
-	gnuplot_cmd(h, "set terminal svg");
-	gnuplot_cmd(h, "set output 'gnuplot/vitesse.svg'");
-	gnuplot_cmd (h, "plot 'gnuplot/speed' using 1:2 title 'x' with linespoints");
-	gnuplot_cmd(h, "replot 'gnuplot/speed' using 1:3 title 'y' with linespoints");
-	gnuplot_cmd(h,"replot 'gnuplot/speed' using 1:4 title 'z' with linespoints");
+	cmd = malloc((strlen("set xrange [:]") + 5));
+	sprintf(cmd, "set xrange [%f:%f]", min.x, min.y);
+	gnuplot_cmd(h, cmd);
+	sprintf(cmd, "set yrange [%f:%f]", min.x, min.y);
+	gnuplot_cmd(h, cmd);
+	sprintf(cmd, "set zrange [%f:%f]", min.x, min.y);
+	gnuplot_cmd(h, cmd);
+	free(cmd);
 
-}
+	cmd = malloc((strlen("replot '' using 1:3 title 'y' with linespoints") + strlen(simuFile) + 1) * sizeof(char));
+	sprintf(cmd, "plot '%s' using 1:2 title 'x' with linespoints", simuFile);
+	gnuplot_cmd(h, cmd);
+	sprintf(cmd, "replot '%s' using 1:3 title 'y' with linespoints", simuFile);
+	gnuplot_cmd(h, cmd);
+	sprintf(cmd, "replot '%s' using 1:4 title 'z' with linespoints", simuFile);
+	gnuplot_cmd(h, cmd);
+	free(cmd);
 
-void gnu_position(){
-
-	gnuplot_ctrl *h;
-	h = gnuplot_init();
-	gnuplot_cmd(h, "set xlabel 'x'");
-	gnuplot_cmd(h, "set ylabel 'y'");
-	gnuplot_cmd(h, "set ylabel 'z'");
-	gnuplot_cmd(h, "set terminal svg");
-	gnuplot_cmd(h, "set output 'gnuplot/position.svg'");
-	gnuplot_cmd(h, "splot 'gnuplot/position' using 2:3:4 with linespoints");
 }
 
 /*
@@ -77,6 +72,16 @@ void* client(void* args){
 	int messageCount=1;
 	Statistic stats;
 	int errorPacket=0;
+
+	Vector3 valueAccelMin, valueAccelMax;
+	Vector3 valueSpeedMin, valueSpeedMax;
+	Vector3 valuePositionMin, valuePositionMax;
+	getZeroVector3(valueAccelMin);
+	getZeroVector3(valueAccelMax);
+	getZeroVector3(valueSpeedMin);
+	getZeroVector3(valueSpeedMax);
+	getZeroVector3(valuePositionMin);
+	getZeroVector3(valuePositionMax);
 
 	FILE* positionCsv = NULL;
 	FILE* speedCsv = NULL;
@@ -167,17 +172,52 @@ void* client(void* args){
 			double ax1, ay1, az1;
 
 			packetMessageId1 = (int) strtol(packetMessage.packetId, NULL,16);
+
 			x1 = atof(packetMessage.x);
+			if(x1 < valuePositionMin.x){
+				valuePositionMin.x = x1;
+			}
+
 			y1 = atof(packetMessage.y);
+			if(y1 < valuePositionMin.y){
+				valuePositionMin.y = y1;
+			}
+
 			z1 = atof(packetMessage.z);
+			if(z1 < valuePositionMin.z){
+				valuePositionMin.z = z1;
+			}
 
 			vx1 = atof(packetMessage.vx);
+			if(vx1 < valueSpeedMin.x){
+				valueSpeedMin.x = vx1;
+			}
+
 			vy1 = atof(packetMessage.vy);
+			if(vy1 < valueSpeedMin.y){
+				valueSpeedMin.y = vy1;
+			}
+
 			vz1 = atof(packetMessage.vz);
+			if(vz1 < valueSpeedMin.z){
+				valueSpeedMin.z = vz1;
+			}
 
 			ax1 = atof(packetMessage.ax);
+			if(ax1 < valueAccelMin.x){
+				valueAccelMin.x = ax1;
+			}
+
 			ay1 = atof(packetMessage.ay);
+			if(ay1 < valueAccelMin.y){
+				valueAccelMin.y = ay1;
+			}
+
 			az1 = atof(packetMessage.az);
+			if(az1 < valueAccelMin.z){
+				valueAccelMin.z = az1;
+			}
+
 
 			sprintf(packetMessageId, "%d", packetMessageId1);
 			sprintf(x, "%lf", x1);
@@ -226,6 +266,8 @@ void* client(void* args){
 
 			int packetId = (int)strtol(packetMessage.packetId,NULL,16);
 
+			printf("PACKET IDDDDD : %d\n", packetId);
+
 			if(packetId != count){
 				/* Un packet à eu une échéance manquée*/
 				printf("packet id %d count %d\n", packetId,count);
@@ -259,9 +301,9 @@ void* client(void* args){
 			fclose(positionCsv);
 			fclose(speedCsv);
 			fclose(accelCsv);
-			gnu_accel();
-			gnu_speed();
-			gnu_position();
+			gnu_graph(valueAccelMin, valueAccelMax, ACCEL_SIMU, ACCEL_RESULT);
+			gnu_graph(valueSpeedMin, valueSpeedMax, SPEED_SIMU, SPEED_RESULT);
+			gnu_graph(valuePositionMin, valuePositionMax, POSITION_SIMU, POSITION_RESULT);
 		}
 
 	}
