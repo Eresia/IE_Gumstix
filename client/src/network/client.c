@@ -98,6 +98,7 @@ void launch_client()
 
 				id++;
 			}
+			incrementSimulatedIterator();
 			i++;
 		}
 	}

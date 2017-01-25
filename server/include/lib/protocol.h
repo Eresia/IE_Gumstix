@@ -15,8 +15,6 @@
 #define MAXLENGTH 150
 #define MAXPAYLOAD 150
 
-FILE* csvFile;
-
 /*
 * receive UDP message
 */
@@ -62,7 +60,7 @@ struct protocol{
 
 /**
  * \struct StartMessage
- * \brief Structure contenant l'intégralité des données d'un message de type StartMessage 
+ * \brief Structure contenant l'intégralité des données d'un message de type StartMessage
  */
 
 

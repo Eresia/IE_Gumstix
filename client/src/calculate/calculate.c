@@ -1,4 +1,33 @@
+#include <math.h>
+#include <stdlib.h>
+
 #include "calculate/calculate.h"
+
+#ifndef IS_GUMSTIX
+	Vector3* simulatedValues;
+	int simulatedIterator;
+
+	void initializeSimulator(int nbLoop){
+		int i;
+
+		simulatedValues = malloc(nbLoop * sizeof(Vector3));
+		simulatedIterator = 0;
+
+		float angleUnity = (2 * M_PI) / ((float) nbLoop);
+
+		for(i = 0; i < nbLoop; i++){
+			float angle = angleUnity * i;
+			//printf("aaaa\n");
+			simulatedValues[i].x = cos(angle) * CIRCLE_RAYON;
+			simulatedValues[i].y = sin(angle) * CIRCLE_RAYON;
+			simulatedValues[i].z = 0;
+		}
+	}
+
+	void incrementSimulatedIterator(){
+		simulatedIterator++;
+	}
+#endif
 
 long getTime(struct timeval beginTime, struct timeval actualTime){
 	long begin = beginTime.tv_sec * 1000000 + beginTime.tv_usec;
@@ -14,35 +43,48 @@ int8_t convertValue(uint8_t value){
 Vector3 calculateAcceleration(){
 	Vector3 acceleration;
 
-	acceleration.x = convertValue(getI2cValue(ASK_BUS, ASK_ADDRESS, ASK_X));
-	acceleration.y = convertValue(getI2cValue(ASK_BUS, ASK_ADDRESS, ASK_Y));
-	acceleration.z = convertValue(getI2cValue(ASK_BUS, ASK_ADDRESS, ASK_Z));
+	#ifdef IS_GUMSTIX
+		acceleration.x = convertValue(getI2cValue(ASK_BUS, ASK_ADDRESS, ASK_X));
+		acceleration.y = convertValue(getI2cValue(ASK_BUS, ASK_ADDRESS, ASK_Y));
+		acceleration.z = convertValue(getI2cValue(ASK_BUS, ASK_ADDRESS, ASK_Z));
+	#else
+		acceleration = simulatedValues[simulatedIterator];
+	#endif
 
 	return acceleration;
 }
 
 Vector3 calibrate(long miliseconds){
-	struct timeval beginTime, actualTime;
-	int i = 0;
+
+	#ifdef IS_GUMSTIX
+		struct timeval beginTime, actualTime;
+		int i = 0;
+
+	#endif
+
 	Vector3 average;
 
 	average.x = 0;
 	average.y = 0;
 	average.z = 0;
 
-	gettimeofday(&beginTime, NULL);
+	#ifdef IS_GUMSTIX
 
-	do{
-		average.x += convertValue(getI2cValue(ASK_BUS, ASK_ADDRESS, ASK_X));
-		average.y += convertValue(getI2cValue(ASK_BUS, ASK_ADDRESS, ASK_Y));
-		average.z += convertValue(getI2cValue(ASK_BUS, ASK_ADDRESS, ASK_Z));
-		gettimeofday(&actualTime, NULL);
-		i++;
-	}while(getTime(beginTime, actualTime) < (miliseconds * 1000));
+		gettimeofday(&beginTime, NULL);
 
-	average.x /= i;
-	average.y /= i;
-	average.z /= i;
+		do{
+			average.x += convertValue(getI2cValue(ASK_BUS, ASK_ADDRESS, ASK_X));
+			average.y += convertValue(getI2cValue(ASK_BUS, ASK_ADDRESS, ASK_Y));
+			average.z += convertValue(getI2cValue(ASK_BUS, ASK_ADDRESS, ASK_Z));
+			gettimeofday(&actualTime, NULL);
+			i++;
+		}while(getTime(beginTime, actualTime) < (miliseconds * 1000));
+
+		average.x /= i;
+		average.y /= i;
+		average.z /= i;
+
+	#endif
 
 	return average;
 }
