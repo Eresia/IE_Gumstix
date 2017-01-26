@@ -13,7 +13,8 @@
 #define SPEED_RESULT "gnuplot/speed.svg"
 #define ACCEL_RESULT "gnuplot/acceleration.svg"
 
-void gnu_graph(Vector3 min, Vector3 max, char* simuFile, char* resultFile);
+void gnu_2D(float min, float max, char* label, char* simuFile, char* resultFile);
+void gnu_3D(char* label, char* simuFile, char* resultFile);
 
 void affiche_Statistique(Statistic stats);
 void diep(char *s);

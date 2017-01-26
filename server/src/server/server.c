@@ -1,36 +1,49 @@
 #include "server/server.h"
 
-void gnu_graph(Vector3 min, Vector3 max, char* simuFile, char* resultFile){
-	char* cmd;
+void gnu_2D(float min, float max, char* label, char* simuFile, char* resultFile){
+	char* cmd = malloc(100 * sizeof(char));
 	gnuplot_ctrl *h;
 	h = gnuplot_init();
 	gnuplot_cmd(h, "set xlabel 'temps en secondes'");
-	gnuplot_cmd(h, "set ylabel 'acceleration'");
+
+	sprintf(cmd, "set ylabel '%s'", label);
+	gnuplot_cmd(h, cmd);
+
 	gnuplot_cmd(h, "set terminal svg");
 
-	cmd = malloc((strlen("set output ''") + strlen(resultFile) + 1) * sizeof(char));
 	sprintf(cmd, "set output '%s'", resultFile);
 	gnuplot_cmd(h, cmd);
-	free(cmd);
+	//free(cmd);
 
-	cmd = malloc((strlen("set xrange [:]") + 5));
-	sprintf(cmd, "set xrange [%f:%f]", min.x, min.y);
+	sprintf(cmd, "set yrange [%f:%f]", min, max);
 	gnuplot_cmd(h, cmd);
-	sprintf(cmd, "set yrange [%f:%f]", min.x, min.y);
-	gnuplot_cmd(h, cmd);
-	sprintf(cmd, "set zrange [%f:%f]", min.x, min.y);
-	gnuplot_cmd(h, cmd);
-	free(cmd);
+	//free(cmd);
 
-	cmd = malloc((strlen("replot '' using 1:3 title 'y' with linespoints") + strlen(simuFile) + 1) * sizeof(char));
 	sprintf(cmd, "plot '%s' using 1:2 title 'x' with linespoints", simuFile);
 	gnuplot_cmd(h, cmd);
 	sprintf(cmd, "replot '%s' using 1:3 title 'y' with linespoints", simuFile);
 	gnuplot_cmd(h, cmd);
 	sprintf(cmd, "replot '%s' using 1:4 title 'z' with linespoints", simuFile);
 	gnuplot_cmd(h, cmd);
-	free(cmd);
+	//free(cmd);
 
+}
+
+void gnu_3D(char* label, char* simuFile, char* resultFile){
+	char* cmd = malloc(100 * sizeof(char));
+	gnuplot_ctrl *h;
+	h = gnuplot_init();
+
+	gnuplot_cmd(h, "set xlabel 'x'");
+	gnuplot_cmd(h, "set ylabel 'y'");
+	gnuplot_cmd(h, "set ylabel 'z'");
+	gnuplot_cmd(h, "set terminal svg");
+
+	sprintf(cmd, "set output '%s'", resultFile);
+	gnuplot_cmd(h, cmd);
+
+	sprintf(cmd, "splot '%s' using 2:3:4 title '%s' with linespoints", simuFile, label);
+	gnuplot_cmd(h, cmd);
 }
 
 /*
@@ -62,6 +75,24 @@ void diep(char *s)
 	exit(1);
 }
 
+float min(float a, float b){
+	if(a < b){
+		return a;
+	}
+	else{
+		return b;
+	}
+}
+
+float max(float a, float b){
+	if(a > b){
+		return a;
+	}
+	else{
+		return b;
+	}
+}
+
 void* client(void* args){
 
 	struct sockaddr_in si_me, si_other;
@@ -73,15 +104,9 @@ void* client(void* args){
 	Statistic stats;
 	int errorPacket=0;
 
-	Vector3 valueAccelMin, valueAccelMax;
-	Vector3 valueSpeedMin, valueSpeedMax;
-	Vector3 valuePositionMin, valuePositionMax;
-	getZeroVector3(valueAccelMin);
-	getZeroVector3(valueAccelMax);
-	getZeroVector3(valueSpeedMin);
-	getZeroVector3(valueSpeedMax);
-	getZeroVector3(valuePositionMin);
-	getZeroVector3(valuePositionMax);
+	float valueAccelMin = 999, valueAccelMax = -999;
+	float valueSpeedMin = 999, valueSpeedMax = -999;
+	float valuePositionMin = 999, valuePositionMax = -999;
 
 	FILE* positionCsv = NULL;
 	FILE* speedCsv = NULL;
@@ -173,51 +198,28 @@ void* client(void* args){
 
 			packetMessageId1 = (int) strtol(packetMessage.packetId, NULL,16);
 
+
+
 			x1 = atof(packetMessage.x);
-			if(x1 < valuePositionMin.x){
-				valuePositionMin.x = x1;
-			}
-
 			y1 = atof(packetMessage.y);
-			if(y1 < valuePositionMin.y){
-				valuePositionMin.y = y1;
-			}
-
 			z1 = atof(packetMessage.z);
-			if(z1 < valuePositionMin.z){
-				valuePositionMin.z = z1;
-			}
+
+			valuePositionMin = min(min(min(valuePositionMin, x1), y1), z1);
+			valuePositionMax = max(max(max(valuePositionMax, x1), y1), z1);
 
 			vx1 = atof(packetMessage.vx);
-			if(vx1 < valueSpeedMin.x){
-				valueSpeedMin.x = vx1;
-			}
-
 			vy1 = atof(packetMessage.vy);
-			if(vy1 < valueSpeedMin.y){
-				valueSpeedMin.y = vy1;
-			}
-
 			vz1 = atof(packetMessage.vz);
-			if(vz1 < valueSpeedMin.z){
-				valueSpeedMin.z = vz1;
-			}
+
+			valueAccelMin = min(min(min(valueAccelMin, vx1), vy1), vz1);
+			valueAccelMax = max(max(max(valueAccelMax, vx1), vy1), vz1);
 
 			ax1 = atof(packetMessage.ax);
-			if(ax1 < valueAccelMin.x){
-				valueAccelMin.x = ax1;
-			}
-
 			ay1 = atof(packetMessage.ay);
-			if(ay1 < valueAccelMin.y){
-				valueAccelMin.y = ay1;
-			}
-
 			az1 = atof(packetMessage.az);
-			if(az1 < valueAccelMin.z){
-				valueAccelMin.z = az1;
-			}
 
+			valueAccelMin = min(min(min(valueAccelMin, ax1), ay1), az1);
+			valueAccelMax = max(max(max(valueAccelMax, ax1), ay1), az1);
 
 			sprintf(packetMessageId, "%d", packetMessageId1);
 			sprintf(x, "%lf", x1);
@@ -301,9 +303,9 @@ void* client(void* args){
 			fclose(positionCsv);
 			fclose(speedCsv);
 			fclose(accelCsv);
-			gnu_graph(valueAccelMin, valueAccelMax, ACCEL_SIMU, ACCEL_RESULT);
-			gnu_graph(valueSpeedMin, valueSpeedMax, SPEED_SIMU, SPEED_RESULT);
-			gnu_graph(valuePositionMin, valuePositionMax, POSITION_SIMU, POSITION_RESULT);
+			gnu_2D(valueAccelMin, valueAccelMax, "acceleration", ACCEL_SIMU, ACCEL_RESULT);
+			gnu_2D(valueSpeedMin, valueSpeedMax, "vitesse", SPEED_SIMU, SPEED_RESULT);
+			gnu_3D("position", POSITION_SIMU, POSITION_RESULT);
 		}
 
 	}

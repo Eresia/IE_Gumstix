@@ -27,7 +27,7 @@
 	#define STOP_TIMEOUT 500
 
 	#ifdef IS_GUMSTIX
-		#define SRV_IP "192.168.10.2"
+		#define SRV_IP "192.168.10.3"
 	#else
 		#define SRV_IP "127.0.0.1"
 	#endif
