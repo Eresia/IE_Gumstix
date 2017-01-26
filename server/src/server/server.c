@@ -211,8 +211,8 @@ void* client(void* args){
 			vy1 = atof(packetMessage.vy);
 			vz1 = atof(packetMessage.vz);
 
-			valueAccelMin = min(min(min(valueAccelMin, vx1), vy1), vz1);
-			valueAccelMax = max(max(max(valueAccelMax, vx1), vy1), vz1);
+			valueSpeedMin = min(min(min(valueAccelMin, vx1), vy1), vz1);
+			valueSpeedMax = max(max(max(valueAccelMax, vx1), vy1), vz1);
 
 			ax1 = atof(packetMessage.ax);
 			ay1 = atof(packetMessage.ay);

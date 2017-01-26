@@ -52,6 +52,7 @@ void launch_client()
 	i = 0;
 
 	average = calibrate(1000);
+	printf("End of Calibration\n");
 	informations.acceleration = getZeroVector3();
 	informations.speed = getZeroVector3();
 	informations.position = getZeroVector3();
